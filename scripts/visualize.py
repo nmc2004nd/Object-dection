@@ -20,7 +20,7 @@ def draw_boxes(frame, detections, class_names=None, color=(0, 255, 0), thickness
         cls_id = detection['cls']
 
         label = class_names[cls_id] if class_names else str(cls_id) # nếu có class names thì dùng, không thì dùng id
-        text = f"{label}: {conf:.2f}"
+        text = f"{label} - ID: {detection['track_id']}: {conf:.2f}"
 
         # Vẽ bounding box và text lên frame
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)

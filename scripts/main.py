@@ -1,8 +1,8 @@
 import cv2
-from scripts import saver
 from visualize import draw_boxes
 from detector import YOLODetector
 from saver import ResultsSaver
+from counter import LineCounter, ZoneCounter, LaneZoneCounter
 
 INPUT_PATH = "D:/NMC/Object-detection/inputs/videos/videoplayback.mp4"
 VID_STRIDE = 1 # 1: downsample video, 0: use original video
@@ -28,9 +28,15 @@ def main():
     
     cap = cv2.VideoCapture(INPUT_PATH)
 
+    shape = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
     frame_id = 0
 
     detections = []
+
+    line_counter = LineCounter(line_position=[(100, 200), (500, 200)])
+    zone_counter = ZoneCounter(zone_position=[(200, 50), (500, 200)])
+    lane_zone_counter = LaneZoneCounter(points=[(203, 83), (382, 83), (482, 200), (133, 200)], frame_size=shape)
 
     if not cap.isOpened():
         print("Khong the mo video stream or file")
@@ -43,10 +49,18 @@ def main():
 
         if frame_id % VID_STRIDE == 0:
             detections = detector.detect(frame)
+
+            line_counter.update_count(detections)
+            # zone_counter.update_count(detections)
+            # lane_zone_counter.update_count(detections)
+
             # saver.save(frame, detections, frame_id)
         frame_id += 1
 
         frame = draw_boxes(frame, detections, class_names=detector.model.names)
+        frame = line_counter.draw(frame)
+        # frame = zone_counter.draw(frame)
+        # frame = lane_zone_counter.draw(frame)
         cv2.imshow("Video", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):

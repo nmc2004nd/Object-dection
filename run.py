@@ -36,7 +36,8 @@ def main():
     # Lấy trực tiếp thông tin cấu hình từ YAML
     counter_kwargs = {
         'points': counter_cfg.get('points'),
-        'colors': counter_cfg.get('colors', [(0, 0, 255)])  # Mặc định là màu Đỏ (BGR)
+        'colors': counter_cfg.get('colors', [(0, 0, 255)]),  # Mặc định là màu Đỏ (BGR)
+        'max_speed': config['speed'].get('max_speed', len(counter_cfg.get('points', [])) * [float('inf')])  # Mặc định là vô hạn nếu không có cấu hình
     }
 
     # Run the detection pipeline on the video

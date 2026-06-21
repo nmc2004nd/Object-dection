@@ -59,3 +59,12 @@ visualizer:
   show_count: true
   # show_fps: true
   # show_time: true
+
+speed:
+  enable: true
+  FPS: 30 
+  # tính thời gian lấy mẫu distance
+  pixel_per_meter: 5
+  # calib bằng pixel_per_meter = pixel / meter : phải biết được kích thước thực tế của 1 vật tron video để calib ra pixel_per_meter
+  buffer_size: 5 
+  max_speed: [70, 70, 70, 70] # km/h, tốc độ tối đa cho từng làn

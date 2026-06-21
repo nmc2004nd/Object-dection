@@ -7,6 +7,7 @@ from src.saver.saver import ResultsSaver
 from src.visualize.visualize import draw_boxes
 from src.counter.line_counter import LineCounter
 from src.counter.zone_counter import ZoneCounter, LaneZoneCounter, MultipleLaneZoneCounter
+from src.counter.speed.speed_estimator import SpeedEstimator
 
 logger = logging.getLogger('src')
 
@@ -36,6 +37,13 @@ class DetectionPipeline:
         # Initialize the line and zone counters
         self.counter = None
 
+        # Initialize the speed estimator
+        self.speed_estimator = SpeedEstimator(
+            pixel_per_meter=config['speed']['pixel_per_meter'],
+            fps=config['speed']['FPS'],
+            buffer_size=config['speed']['buffer_size']
+        )
+
         logger.info("Detection pipeline initialized.")
 
     def initialize_counter(self, counter_type, **kwargs):
@@ -56,7 +64,8 @@ class DetectionPipeline:
             points = kwargs.get('points', None)
             frame_size = kwargs.get('frame_size', None)
             colors = kwargs.get('colors', 4*[(0, 0, 255)])
-            self.counter = MultipleLaneZoneCounter(list_points=points, frame_size=frame_size, colors=colors)
+            max_speed = kwargs.get('max_speed', 4*[float('inf')])
+            self.counter = MultipleLaneZoneCounter(list_points=points, frame_size=frame_size, colors=colors, max_speed=max_speed)
             logger.info(f"Multiple lane zone counter initialized with {len(colors)} zones.")
         else:
             raise ValueError(f"Unsupported counter type: {counter_type}")
@@ -94,12 +103,13 @@ class DetectionPipeline:
 
             if frame_id == 1 or frame_id % vid_stride == 0:
                 detections = self.detector.detect(frame)
+                self.speed_estimator.update(detections, frame_id)
 
                 if self.config['saver'].get('save_images', False):
                     self.saver.save(frame, detections, frame_id)
 
-            if self.counter:
-                self.counter.update_count(detections)
+                if self.counter:
+                    self.counter.update_count(detections)
 
             frame = draw_boxes(frame, detections)
 

@@ -97,7 +97,7 @@ class LaneZoneCounter:
     
 
 class MultipleLaneZoneCounter(LaneZoneCounter):
-    def __init__(self, list_points: list[list[tuple]], frame_size: tuple, colors: list[tuple]):
+    def __init__(self, list_points: list[list[tuple]], frame_size: tuple, colors: list[tuple], max_speed: list[float]):
         # Gọi lớp cha để khởi tạo thông số nền tảng
         super().__init__(points=list_points[0], frame_size=frame_size) 
         
@@ -115,6 +115,16 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
                 cleaned_colors.append(tuple(map(int, color)))
         self.colors = cleaned_colors
         # ------------------------------------
+        # --- BƯỚC XỬ LÝ TỐC ĐỘ TỐI ĐA AN TOÀN ---
+        if max_speed is None:
+            max_speed = [0.0] * len(list_points)
+        else:
+            self.max_speed = max_speed
+            if len(self.max_speed) != len(list_points):
+                raise ValueError("Length of max_speed must match length of list_points")
+            
+        self.track_ids = {}  # theo dõi vượt quá tốc độ cho từng track_id
+        # ------------------------------------
 
         # Khởi tạo bộ đếm độc lập cho từng vùng
         self.count = [0] * len(list_points)
@@ -130,14 +140,16 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
     def update_count(self, detections: list[dict]):
         self.centers = []
         current_inside_id = [set() for _ in range(len(self.list_masks))]
+        current_speeds = set() # lưu id vi phạm tốc độ tối đa trong frame hiện tại
 
         for detection in detections:
             x1, y1, x2, y2 = detection['bbox']
             track_id = detection['track_id']
             center_x = int((x1 + x2) / 2)
             center_y = int((y1 + y2) / 2)
+            
+            speed = detection.get('speed', 0.0)
 
-            self.centers.append((center_x, center_y))
 
             if center_x < 0 or center_x >= self.frame_size[0] or center_y < 0 or center_y >= self.frame_size[1]:
                 continue
@@ -146,16 +158,24 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
             for i, mask in enumerate(self.list_masks):
                 if mask[center_y, center_x] == 255:
                     current_inside_id[i].add(track_id)
+                    # --- BƯỚC KIỂM TRA TỐC ĐỘ TỐI ĐA ---
+                    if speed > self.max_speed[i]:
+                        current_speeds.add(track_id)
+                        detection['speed_violation'] = True  # Đánh dấu vi phạm tốc độ trong detection : để đổi màu theo dõi
 
+            self.centers.append((center_x, center_y, detection.get('speed_violation', False)))  # Thêm thông tin vi phạm tốc độ vào tâm điểm
+    
         self.count = [len(ids) for ids in current_inside_id]
         self.inside_id = current_inside_id
+        self.track_ids = current_speeds
 
     def draw(self, frame):
         overlay = frame.copy()
 
         # 1. Vẽ các tâm điểm vật thể hiện tại (màu trắng)
-        for cx, cy in self.centers:
-            cv2.circle(frame, (cx, cy), 5, (255, 255, 255), -1)
+        for cx, cy, speed_violation in self.centers:
+            color = (0, 0, 255) if speed_violation else (255, 255, 255)
+            cv2.circle(frame, (cx, cy), 5, color, -1)
 
         # 2. Vẽ phủ màu tất cả các vùng lên overlay và vẽ viền lên frame
         for pts, color in zip(self.list_points, self.colors):
@@ -171,6 +191,6 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
             text_y = 30 + i * 35
             cv2.putText(frame, f'Zone {i+1}: {self.count[i]}', (10, text_y), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-
+            
         return frame
     

@@ -6,7 +6,7 @@ from src.detector.detector import YOLODetector
 from src.saver.saver import ResultsSaver
 from src.visualize.visualize import draw_boxes
 from src.counter.line_counter import LineCounter
-from src.counter.zone_counter import ZoneCounter, LaneZoneCounter
+from src.counter.zone_counter import ZoneCounter, LaneZoneCounter, MultipleLaneZoneCounter
 
 logger = logging.getLogger('src')
 
@@ -52,6 +52,12 @@ class DetectionPipeline:
             frame_size = kwargs.get('frame_size', None)
             self.counter = LaneZoneCounter(points=points, frame_size=frame_size)
             logger.info("Lane zone counter initialized.")
+        elif counter_type == 'multiple_lane_zone':
+            points = kwargs.get('points', None)
+            frame_size = kwargs.get('frame_size', None)
+            colors = kwargs.get('colors', [(0, 0, 255)])
+            self.counter = MultipleLaneZoneCounter(list_points=points, frame_size=frame_size, colors=colors)
+            logger.info("Multiple lane zone counter initialized.")
         else:
             raise ValueError(f"Unsupported counter type: {counter_type}")
         

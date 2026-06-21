@@ -46,13 +46,13 @@ class ZoneCounter:
     
 class LaneZoneCounter:
     def __init__(self, points: list[tuple], frame_size: tuple):
-        self.frame_size = frame_size # (width, height)
+        self.frame_size = frame_size # (height, width)
         self.points = np.array(points, dtype=np.int32)
         self.count = 0
         self.inside_id = set() # tránh trùng
 
         # Tạo mặt nạ cho khu vực được xác định bởi các điểm
-        self.mask = np.zeros((frame_size[1], frame_size[0]), dtype=np.uint8)
+        self.mask = np.zeros((frame_size[0], frame_size[1]), dtype=np.uint8)
         cv2.fillPoly(self.mask, [self.points], 255)
 
     def update_count(self, detections: list[dict]):
@@ -92,6 +92,85 @@ class LaneZoneCounter:
         cv2.polylines(frame, [self.points], isClosed=True, color=(0, 0, 255), thickness=2)
 
         cv2.putText(frame, f'Count: {self.count}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        return frame
+    
+
+class MultipleLaneZoneCounter(LaneZoneCounter):
+    def __init__(self, list_points: list[list[tuple]], frame_size: tuple, colors: list[tuple]):
+        # Gọi lớp cha để khởi tạo thông số nền tảng
+        super().__init__(points=list_points[0], frame_size=frame_size) 
+        
+        self.list_points = [np.array(pts, dtype=np.int32) for pts in list_points]
+        
+        # --- BƯỚC CONVERT MÀU SẮC AN TOÀN ---
+        # Ép kiểu dữ liệu màu từ chuỗi "(B, G, R)" trong YAML thành Tuple số nguyên (B, G, R)
+        cleaned_colors = []
+        for color in colors:
+            if isinstance(color, str):
+                color = color.replace('(', '').replace(')', '')
+                b, g, r = map(int, color.split(','))
+                cleaned_colors.append((b, g, r))
+            else:
+                cleaned_colors.append(tuple(map(int, color)))
+        self.colors = cleaned_colors
+        # ------------------------------------
+
+        # Khởi tạo bộ đếm độc lập cho từng vùng
+        self.count = [0] * len(list_points)
+        self.inside_id = [set() for _ in range(len(list_points))]
+        
+        # Tạo danh sách mặt nạ (masks) cho từng vùng
+        self.list_masks = []
+        for pts in self.list_points:
+            mask = np.zeros((frame_size[1], frame_size[0]), dtype=np.uint8)
+            cv2.fillPoly(mask, [pts], 255)
+            self.list_masks.append(mask)
+
+    def update_count(self, detections: list[dict]):
+        self.centers = []
+        current_inside_id = [set() for _ in range(len(self.list_masks))]
+
+        for detection in detections:
+            x1, y1, x2, y2 = detection['bbox']
+            track_id = detection['track_id']
+            center_x = int((x1 + x2) / 2)
+            center_y = int((y1 + y2) / 2)
+
+            self.centers.append((center_x, center_y))
+
+            if center_x < 0 or center_x >= self.frame_size[0] or center_y < 0 or center_y >= self.frame_size[1]:
+                continue
+
+            # Kiểm tra xem tâm vật thể nằm trong vùng nào
+            for i, mask in enumerate(self.list_masks):
+                if mask[center_y, center_x] == 255:
+                    current_inside_id[i].add(track_id)
+
+        self.count = [len(ids) for ids in current_inside_id]
+        self.inside_id = current_inside_id
+
+    def draw(self, frame):
+        overlay = frame.copy()
+
+        # 1. Vẽ các tâm điểm vật thể hiện tại (màu trắng)
+        for cx, cy in self.centers:
+            cv2.circle(frame, (cx, cy), 5, (255, 255, 255), -1)
+
+        # 2. Vẽ phủ màu tất cả các vùng lên overlay và vẽ viền lên frame
+        for pts, color in zip(self.list_points, self.colors):
+            cv2.fillPoly(overlay, [pts], color)
+            cv2.polylines(frame, [pts], isClosed=True, color=color, thickness=2)
+
+        # 3. Trộn overlay mờ vào frame gốc (Thực hiện NGOÀI vòng lặp)
+        alpha = 0.4
+        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
+        # 4. In chữ số đếm của từng vùng lên góc màn hình (Xếp hàng dọc, không đè nhau)
+        for i, color in enumerate(self.colors):
+            text_y = 30 + i * 35
+            cv2.putText(frame, f'Zone {i+1}: {self.count[i]}', (10, text_y), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
         return frame
     

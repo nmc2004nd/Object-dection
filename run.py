@@ -12,28 +12,32 @@ def main():
     # Setup logging
     setup_logging()
 
-    Path('inputs').mkdir(parents=True, exist_ok=True)
-    Path('outputs').mkdir(parents=True, exist_ok=True)
-    Path('logs').mkdir(parents=True, exist_ok=True)
-    Path('models').mkdir(parents=True, exist_ok=True)
+    # Tạo các thư mục cần thiết
+    for folder in ['inputs', 'outputs', 'logs', 'models']:
+        Path(folder).mkdir(parents=True, exist_ok=True)
 
     INPUT_PATH = 'inputs/videos/videoplayback.mp4'
-    COUNTER_TYPE = 'line'  # Options: 'line', 'zone', 'lane_zone'
     VID_STRIDE = 1
     DISPLAY = True
+    COUNTER_TYPE = config['counter'][0]['type']  # 'line', 'zone', 'lane_zone', or 'multiple_lane_zone'
+
+    # Kiểm tra xem có cấu hình counter trong file YAML không
+    if 'counter' in config and len(config['counter']) > 0:
+        counter_cfg = config['counter'][0]
+        COUNTER_TYPE = counter_cfg.get('type', 'lane_zone')
+    else:
+        raise ValueError("Cấu hình 'counter' không tồn tại hoặc trống trong file settings!")
+    
+
 
     # Initialize the detection pipeline
     pipeline = DetectionPipeline(config)
     input_path = Path(INPUT_PATH)
-    counter_kwargs = {}
-
-    if COUNTER_TYPE == 'line':
-        counter_kwargs['points'] = [(100, 200), (500, 200)]  
-    elif COUNTER_TYPE == 'zone':
-        counter_kwargs['points'] = [(200, 50), (500, 200)]  
-    elif COUNTER_TYPE == 'lane_zone':
-        counter_kwargs['points'] = [(203, 83), (382, 83), (482, 200), (133, 200)] 
-
+    # Lấy trực tiếp thông tin cấu hình từ YAML
+    counter_kwargs = {
+        'points': counter_cfg.get('points'),
+        'colors': counter_cfg.get('colors', [(0, 0, 255)])  # Mặc định là màu Đỏ (BGR)
+    }
 
     # Run the detection pipeline on the video
     if input_path.suffix.lower() in ['.mp4', '.avi', '.mov', '.mkv']:

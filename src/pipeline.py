@@ -55,9 +55,9 @@ class DetectionPipeline:
         elif counter_type == 'multiple_lane_zone':
             points = kwargs.get('points', None)
             frame_size = kwargs.get('frame_size', None)
-            colors = kwargs.get('colors', [(0, 0, 255)])
+            colors = kwargs.get('colors', 4*[(0, 0, 255)])
             self.counter = MultipleLaneZoneCounter(list_points=points, frame_size=frame_size, colors=colors)
-            logger.info("Multiple lane zone counter initialized.")
+            logger.info(f"Multiple lane zone counter initialized with {len(colors)} zones.")
         else:
             raise ValueError(f"Unsupported counter type: {counter_type}")
         

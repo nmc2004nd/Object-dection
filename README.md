@@ -11,6 +11,7 @@ Dự án này cung cấp một giải pháp mạnh mẽ để phát hiện, theo
   - `zone`: Đếm đối tượng bên trong một vùng hình chữ nhật.
   - `lane_zone`: Đếm đối tượng trong một vùng đa giác tùy chỉnh (Polygon).
   - `multiple_lane_zone`: Đếm đồng thời trên nhiều làn đường với màu sắc phân biệt.
+- **Ước lượng tốc độ:** Tính toán và hiển thị tốc độ của các đối tượng đang di chuyển.
 - **Cấu hình linh hoạt:** Mọi thông số từ mô hình, ngưỡng tin cậy (Confidence), đến các vùng đếm đều được cấu hình dễ dàng qua file YAML.
 - **Lưu trữ kết quả:** Hỗ trợ lưu video đầu ra, hình ảnh từng frame và thông tin phát hiện.
 
@@ -25,7 +26,7 @@ Object-dection/
 ├── outputs/            # Kết quả đầu ra (Videos, Logs)
 ├── scripts/            # Các script thử nghiệm và tiện ích
 ├── src/                # Mã nguồn chính của Pipeline
-│   ├── counter/        # Logic đếm (Line, Zone, Lane)
+│   ├── counter/        # Logic đếm (Line, Zone, Lane, Multiple Lane, speed estimation)
 │   ├── detector/       # Wrapper cho YOLO Detector
 │   ├── saver/          # Logic lưu trữ kết quả
 │   └── visualize/      # Công cụ vẽ và hiển thị

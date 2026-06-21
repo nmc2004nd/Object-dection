@@ -1,0 +1,53 @@
+version: 1
+
+formatters:
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+    # format: ví dụ 2024-06-01 12:00:00 - my_logger - INFO - This is an info message
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: INFO
+    formatter: simple
+    filename: logs/app.log
+    encoding: utf8
+
+loggers:
+  src:
+    level: INFO
+    handlers: [console, file]
+    propagate: no # Đảm bảo rằng log của logger này không được truyền lên logger gốc
+    
+  detector:
+    level: INFO
+    handlers: [console, file]
+    propagate: no # Đảm bảo rằng log của logger này không được truyền lên logger gốc
+  
+  counter:
+    level: INFO
+    handlers: [console, file]
+    propagate: no
+
+  saver:
+    level: INFO
+    handlers: [console, file]
+    propagate: no
+
+  visualize:
+    level: INFO
+    handlers: [console, file]
+    propagate: no
+
+root:
+  level: INFO
+  handlers: [console, file]
+

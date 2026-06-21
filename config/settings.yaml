@@ -1,0 +1,40 @@
+app:
+  name: Objective Detection and Tracker
+  version: 1.0.0
+  env: development
+
+data:
+  input: inputs/videos
+  output: outputs/videos
+  model: models
+
+detector:
+  type: yolo26n
+  conf_threshold: 0.5
+  iou_threshold: 0.4
+  classes : [2] # null for all class,
+  max_det: 100
+  device: 0 # 0 for GPU, -1 for CPU
+
+counter:
+  count_line_position: 0.5 # 0.5 for middle of the frame
+  direction: both # up, down, left, right, both
+
+saver:
+  save_images: false
+  save_videos: false
+  save_detections: false
+  save_crops: false
+
+tracker:
+  type: bytetrack # or strongsort
+  max_age: 30
+  n_init: 3
+  iou_threshold: 0.3
+
+visualizer:
+  show_detections: true
+  show_tracks: true
+  show_count: true
+  # show_fps: true
+  # show_time: true

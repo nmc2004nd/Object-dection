@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-video_path = r"D:/NMC/Object-detection/inputs/videos/traffic-drone-top-view.mp4"
+video_path = r"D:/NMC/Object-detection/inputs/videos/video_playback_2.mp4"
 
 cap = cv2.VideoCapture(video_path)
 

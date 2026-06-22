@@ -43,7 +43,7 @@ def load_settings():
     if os.getenv('DETECTOR_DEVICE'):
         settings['detector']['device'] = os.getenv('DETECTOR_DEVICE')
     if os.getenv('DETECTOR_CLASSES'): # 1,2,3 -> ['1','2','3'] -> [1,2,3]
-        settings['detector']['classes'] = [int(x) for x in os.getenv('DETECTOR_CLASSES').split(',')]
+        settings['detector']['classes'] = [int(x) for x in os.getenv('DETECTOR_CLASSES').split(',')] if os.getenv('DETECTOR_CLASSES').lower() != 'none' else None
 
     # Saver settings
     if os.getenv('SAVER_SAVE_IMAGES'):

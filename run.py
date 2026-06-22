@@ -16,7 +16,7 @@ def main():
     for folder in ['inputs', 'outputs', 'logs', 'models']:
         Path(folder).mkdir(parents=True, exist_ok=True)
 
-    INPUT_PATH = 'inputs/videos/traffic-drone-top-view.mp4'
+    INPUT_PATH = 'inputs/videos/video_playback_2.mp4'
     VID_STRIDE = 1
     DISPLAY = True
     COUNTER_TYPE = config['counter'][0]['type']  # 'line', 'zone', 'lane_zone', or 'multiple_lane_zone'
@@ -37,7 +37,8 @@ def main():
     counter_kwargs = {
         'points': counter_cfg.get('points'),
         'colors': counter_cfg.get('colors', [(0, 0, 255)]),  # Mặc định là màu Đỏ (BGR)
-        'max_speed': config['speed'].get('max_speed', len(counter_cfg.get('points', [])) * [float('inf')])  # Mặc định là vô hạn nếu không có cấu hình
+        'max_speed': config['speed'].get('max_speed', len(counter_cfg.get('points', [])) * [float('inf')]),  # Mặc định là vô hạn nếu không có cấu hình
+        'enable_speed_estimation': config['speed'].get('enable', False),
     }
 
     # Run the detection pipeline on the video

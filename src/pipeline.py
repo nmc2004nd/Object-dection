@@ -103,7 +103,8 @@ class DetectionPipeline:
 
             if frame_id == 1 or frame_id % vid_stride == 0:
                 detections = self.detector.detect(frame)
-                self.speed_estimator.update(detections, frame_id)
+                if counter_kwargs['enable_speed_estimation']:
+                    self.speed_estimator.update(detections, frame_id)
 
                 if self.config['saver'].get('save_images', False):
                     self.saver.save(frame, detections, frame_id)

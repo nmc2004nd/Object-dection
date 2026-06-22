@@ -12,6 +12,7 @@ Dự án này cung cấp một giải pháp mạnh mẽ để phát hiện, theo
   - `lane_zone`: Đếm đối tượng trong một vùng đa giác tùy chỉnh (Polygon).
   - `multiple_lane_zone`: Đếm đồng thời trên nhiều làn đường với màu sắc phân biệt.
 - **Ước lượng tốc độ:** Tính toán và hiển thị tốc độ của các đối tượng đang di chuyển.
+- **Train mô hình tùy chỉnh:** Hỗ trợ huấn luyện mô hình YOLO với dữ liệu của người dùng.
 - **Cấu hình linh hoạt:** Mọi thông số từ mô hình, ngưỡng tin cậy (Confidence), đến các vùng đếm đều được cấu hình dễ dàng qua file YAML.
 - **Lưu trữ kết quả:** Hỗ trợ lưu video đầu ra, hình ảnh từng frame và thông tin phát hiện.
 
@@ -21,6 +22,7 @@ Dự án này cung cấp một giải pháp mạnh mẽ để phát hiện, theo
 Object-dection/
 ├── config/             # Cấu hình hệ thống (YAML)
 ├── core/               # Các module xử lý lõi (Load settings, Logging)
+├── customs/             # Mô hình YOLO tùy chỉnh (nếu có)
 ├── inputs/             # Dữ liệu đầu vào (Images, Videos)
 ├── models/             # Chứa các file trọng số mô hình (.pt)
 ├── outputs/            # Kết quả đầu ra (Videos, Logs)

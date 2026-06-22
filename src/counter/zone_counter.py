@@ -113,6 +113,10 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
                 cleaned_colors.append((b, g, r))
             else:
                 cleaned_colors.append(tuple(map(int, color)))
+
+        # map vòng nếu số lượng màu ít hơn số lượng vùng
+        if len(cleaned_colors) < len(list_points):
+            cleaned_colors = (cleaned_colors * (len(list_points) // len(cleaned_colors) + 1))[:len(list_points)]
         self.colors = cleaned_colors
         # ------------------------------------
         # --- BƯỚC XỬ LÝ TỐC ĐỘ TỐI ĐA AN TOÀN ---
@@ -188,9 +192,9 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
 
         # 4. In chữ số đếm của từng vùng lên góc màn hình (Xếp hàng dọc, không đè nhau)
         for i, color in enumerate(self.colors):
-            text_y = 30 + i * 35
+            text_y = 10 + i * 20
             cv2.putText(frame, f'Zone {i+1}: {self.count[i]}', (10, text_y), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
             
         return frame
     

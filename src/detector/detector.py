@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import logging
 
 class YOLODetector: # detect 1 frame nên không cần stride
     def __init__(
@@ -55,18 +56,20 @@ class YOLODetector: # detect 1 frame nên không cần stride
     # có thể dùng dir để xem các property của results
 
         detections = []
+        if results.boxes is not None and results.boxes.id is not None:
+            for box, id in zip(results.boxes, results.boxes.id):
+                x1, y1, x2, y2 = box.xyxy[0].tolist() # lấy tọa độ bounding box
+                conf = float(box.conf[0].item()) # lấy confidence score
+                cls = int(box.cls[0].item()) # lấy class id
+                id = int(id) # lấy ID của đối tượng
 
-        for box, id in zip(results.boxes, results.boxes.id):
-            x1, y1, x2, y2 = box.xyxy[0].tolist() # lấy tọa độ bounding box
-            conf = float(box.conf[0].item()) # lấy confidence score
-            cls = int(box.cls[0].item()) # lấy class id
-            id = int(id) # lấy ID của đối tượng
-
-            detections.append({
-                'bbox': [x1, y1, x2, y2],
-                'conf': conf,
-                'cls': cls,
-                'track_id': id
-            })
+                detections.append({
+                    'bbox': [x1, y1, x2, y2],
+                    'conf': conf,
+                    'cls': cls,
+                    'track_id': id
+                })
+        else:
+            logging.warning("No detections or tracking IDs found in the current frame.")
 
         return detections

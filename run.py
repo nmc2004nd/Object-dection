@@ -16,7 +16,7 @@ def main():
     for folder in ['inputs', 'outputs', 'logs', 'models']:
         Path(folder).mkdir(parents=True, exist_ok=True)
 
-    INPUT_PATH = 'inputs/videos/videoplayback.mp4'
+    INPUT_PATH = 'inputs/videos/traffic-drone-top-view.mp4'
     VID_STRIDE = 1
     DISPLAY = True
     COUNTER_TYPE = config['counter'][0]['type']  # 'line', 'zone', 'lane_zone', or 'multiple_lane_zone'

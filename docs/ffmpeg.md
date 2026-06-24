@@ -23,7 +23,7 @@ winget install Gyan.FFmpeg
 
 3. Cắt theo thời gian:
    ```bash
-   ffmpeg -ss 10 -to 20 -i inputs/videos/video_playback_2.mp4 -vf fps=5 scale=640:640 data/frame_%04d.jpg
+   ffmpeg -ss 10 -to 20 -i inputs/videos/snack-converyo-belt.mp4 -vf fps=5 scale=640:640 data/raw_image_2/frame_%04d.jpg
    ```
 4. Lấy frame theo khoảng cách mỗi n frame
     ```bash

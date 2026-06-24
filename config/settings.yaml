@@ -17,20 +17,20 @@ detector:
   device: 0 # 0 for GPU, -1 for CPU
 
 counter:
-  - type: line
-    points: [[75, 540], [1332, 540]]
-    color: [0, 0, 255] # BGR format
-    thickness: 2
+  # - type: line
+  #   points: [[75, 540], [1332, 540]]
+  #   color: [0, 0, 255] # BGR format
+  #   thickness: 2
 
   # - type: zone
   #   points: [[200, 50], [500, 200]]
   #   color: [0, 0, 255] # BGR format
   #   thickness: 2
 
-  # - type: lane_zone
-  #   points: [[203, 83], [382, 83], [482, 200], [133, 200]]
-  #   color: [0, 0, 255] # BGR format
-  #   thickness: 2
+  - type: lane_zone
+    points: [[566, 400], [850, 361], [920, 432], [718, 479]]
+    color: [0, 0, 255] # BGR format
+    thickness: 2
 
   # - type: multiple_lane_zone
   #   points: [[[220, 55], [86, 285], [192, 285], [256, 55]],

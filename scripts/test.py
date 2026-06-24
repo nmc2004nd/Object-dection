@@ -1,10 +1,20 @@
 import cv2
 import numpy as np
 
-video_path = r"D:/NMC/Object-detection/inputs/videos/video_playback_2.mp4"
+video_path = r"D:/NMC/Object-detection/inputs/videos/snack-converyo-belt.mp4"
 
 cap = cv2.VideoCapture(video_path)
 
+
+## lấy frame giữa để ổn định điểm
+
+# Đọc frame đầu tiên
+ret, frame = cap.read()
+if not ret:
+    raise RuntimeError("Không thể đọc video")
+
+# Đọc frame giữa
+cap.set(cv2.CAP_PROP_POS_FRAMES, cap.get(cv2.CAP_PROP_FRAME_COUNT) // 2)
 ret, frame = cap.read()
 cap.release()
 

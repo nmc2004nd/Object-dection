@@ -49,7 +49,7 @@ class LaneZoneCounter:
         self.frame_size = frame_size # (height, width)
         self.points = np.array(points, dtype=np.int32)
         self.count = 0
-        self.inside_id = set() # tránh trùng
+        self.counter_id = set() # tránh trùng ID đã đếm
 
         # Tạo mặt nạ cho khu vực được xác định bởi các điểm
         self.mask = np.zeros((frame_size[0], frame_size[1]), dtype=np.uint8)
@@ -65,18 +65,23 @@ class LaneZoneCounter:
             center_x = int((x1 + x2) / 2)
             center_y = int((y1 + y2) / 2)
 
+
             self.centers.append((center_x, center_y))
 
-            if center_x < 0 or center_x >= self.frame_size[0] or center_y < 0 or center_y >= self.frame_size[1]:
+            if center_x < 0 or center_x >= self.frame_size[1] or center_y < 0 or center_y >= self.frame_size[0]:
                 continue
 
             if self._inside_zone(center_x, center_y):
                 current_inside_id.add(track_id)
 
+            news = current_inside_id - self.counter_id # phần tử mới xuất hiện trong frame hiện tại
+            self.counter_id.update(news) # cập nhật danh sách ID đã đếm
+            if news:
+                self.count += len(news)
+        # self.count = len(self.counter_id)
 
-        self.count = len(current_inside_id)
-
-        self.inside_id = current_inside_id
+        # self.inside_id = current_inside_id
+        
 
     def _inside_zone(self, center_x: int, center_y: int) -> bool:
         return self.mask[center_y, center_x] == 255
@@ -145,12 +150,14 @@ class MultipleLaneZoneCounter(LaneZoneCounter):
         self.centers = []
         current_inside_id = [set() for _ in range(len(self.list_masks))]
         current_speeds = set() # lưu id vi phạm tốc độ tối đa trong frame hiện tại
+        active_set = set() # lưu id đang hoạt động trong frame hiện tại
 
         for detection in detections:
             x1, y1, x2, y2 = detection['bbox']
             track_id = detection['track_id']
             center_x = int((x1 + x2) / 2)
             center_y = int((y1 + y2) / 2)
+            active_set.add(track_id) # lưu id đang hoạt động trong frame hiện tại
             
             speed = detection.get('speed', 0.0)
 
